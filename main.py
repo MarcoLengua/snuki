@@ -1,17 +1,28 @@
 """
-SNUKI - keyboard prototype
+SNUKI - keyboard prototype / hardware runner
 
 Player 1: Q W E D  -> 0 / 1 / 2 / 3 steps
 Player 2: I O P Ü  -> 0 / 1 / 2 / 3 steps
 
-Run:  python main.py
+Run with keyboard (default):   python main.py
+Run with real sensors (on Pi): python main.py --hardware
 """
 
+import sys
 import pygame
 import config
 from game_state import RaceState
 from input_handler import KeyboardInputProvider
-from renderer import draw_track, draw_horse, draw_hud, draw_win_screen
+from renderer import draw_banner, draw_track, draw_horse, draw_hud, draw_win_screen, HorseAnimator
+
+
+def make_input_provider():
+    if "--hardware" in sys.argv:
+        from input_handler import SensorInputProvider
+        print("Starte mit Sensor-Input (MCP23017)...")
+        return SensorInputProvider()
+    print("Starte mit Tastatur-Input.")
+    return KeyboardInputProvider()
 
 
 def main():
@@ -26,12 +37,13 @@ def main():
 
     num_players = len(config.PLAYER_NAMES)
     race = RaceState(num_players)
-    input_provider = KeyboardInputProvider()
+    input_provider = make_input_provider()
 
     # smoothed on-screen fraction per horse, separate from the logical
     # position so a jump from e.g. 2 to 5 steps glides instead of teleporting
     display_fraction = [0.0] * num_players
     target_fraction = [0.0] * num_players
+    animators = [HorseAnimator() for _ in range(num_players)]
 
     running = True
     while running:
@@ -48,10 +60,12 @@ def main():
                     race.reset()
                     display_fraction = [0.0] * num_players
                     target_fraction = [0.0] * num_players
+                    animators = [HorseAnimator() for _ in range(num_players)]
                 elif event.key == pygame.K_SPACE and race.finished:
                     race.reset()
                     display_fraction = [0.0] * num_players
                     target_fraction = [0.0] * num_players
+                    animators = [HorseAnimator() for _ in range(num_players)]
 
         if not race.finished:
             triggers = input_provider.poll(events)
@@ -66,10 +80,16 @@ def main():
         for i in range(num_players):
             display_fraction[i] += (target_fraction[i] - display_fraction[i]) * smoothing
 
+        moving_epsilon = 0.001
+        for i in range(num_players):
+            moving = abs(target_fraction[i] - display_fraction[i]) > moving_epsilon
+            animators[i].update(dt, moving)
+
         screen.fill(config.BG_COLOR)
+        draw_banner(screen)
         draw_track(screen, num_players, font_label)
         for i in range(num_players):
-            draw_horse(screen, i, display_fraction[i], font_small)
+            draw_horse(screen, i, display_fraction[i], animators[i])
         draw_hud(screen, race, font_small)
 
         if race.finished:
