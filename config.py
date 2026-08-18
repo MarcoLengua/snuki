@@ -91,7 +91,7 @@ FINISH_COLOR = (200, 40, 40)
 # ---------------------------------------------------------------------
 # One MCP23017 per player, addresses set via the A0/A1/A2 pins on the
 # HW-839 boards (see hardware/README_HARDWARE.md).
-MCP_ADDRESSES = [0x20, 0x21, 0x22]
+MCP_ADDRESSES = [0x20]#, 0x21, 0x22]
 
 # Which MCP23017 pin (0-15, i.e. GPA0..GPA7=0..7, GPB0..GPB7=8..15)
 # corresponds to which hole, and how many steps that hole is worth.
@@ -101,16 +101,17 @@ MCP_ADDRESSES = [0x20, 0x21, 0x22]
 PLAYER_PIN_MAP = [
     # Player 1 (board 0x20)
     [
-        (0, 3), (1, 3),                          # 2x rot
-        (2, 2), (3, 2), (4, 2), (5, 2),           # 4x gelb
-        (6, 1), (7, 1), (8, 1), (9, 1), (10, 1), (11, 1), (12, 1),  # 7x blau
+        (0, 3)#, (1, 3),                          # 2x rot
+ #       (2, 2), (3, 2), (4, 2), (5, 2),           # 4x gelb
+  #      (6, 1), (7, 1), (8, 1), (9, 1), (10, 1), (11, 1), (12, 1),  # 7x blau
     ],
     # Player 2 (board 0x21) — same pin layout, different board
-    [
-        (0, 3), (1, 3),
-        (2, 2), (3, 2), (4, 2), (5, 2),
-        (6, 1), (7, 1), (8, 1), (9, 1), (10, 1), (11, 1), (12, 1),
-    ],
+    #[
+     #   (0, 3), (1, 3),
+      #  (2, 2), (3, 2), (4, 2), (5, 2),
+       # (6, 1), (7, 1), (8, 1), (9, 1), (10, 1), (11, 1), (12, 1),
+    
+#],
     # Player 3 (board 0x22) — uncomment once wired
     # [
     #     (0, 3), (1, 3),
