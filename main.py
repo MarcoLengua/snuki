@@ -1,8 +1,8 @@
 """
 SNUKI - keyboard prototype / hardware runner
 
-Player 1: Q W E D  -> 0 / 1 / 2 / 3 steps
-Player 2: I O P Ü  -> 0 / 1 / 2 / 3 steps
+Player 1: A S D F  -> 0 / 1 / 2 / 3 steps
+Player 2: V B N M  -> 0 / 1 / 2 / 3 steps
 
 Run with keyboard (default):   python main.py
 Run with real sensors (on Pi): python main.py --hardware
@@ -11,6 +11,7 @@ Run with real sensors (on Pi): python main.py --hardware
 import sys
 import pygame
 import config
+import audio
 from game_state import RaceState
 from input_handler import KeyboardInputProvider
 from renderer import draw_banner, draw_track, draw_horse, draw_hud, draw_win_screen, HorseAnimator
@@ -27,6 +28,7 @@ def make_input_provider():
 
 def main():
     pygame.init()
+    audio.init()
     pygame.display.set_caption("SNUKI")
     screen = pygame.display.set_mode((config.SCREEN_W, config.SCREEN_H))
     clock = pygame.time.Clock()
@@ -44,6 +46,7 @@ def main():
     display_fraction = [0.0] * num_players
     target_fraction = [0.0] * num_players
     animators = [HorseAnimator() for _ in range(num_players)]
+    final_sound_played = False
 
     running = True
     while running:
@@ -61,16 +64,24 @@ def main():
                     display_fraction = [0.0] * num_players
                     target_fraction = [0.0] * num_players
                     animators = [HorseAnimator() for _ in range(num_players)]
+                    final_sound_played = False
                 elif event.key == pygame.K_SPACE and race.finished:
                     race.reset()
                     display_fraction = [0.0] * num_players
                     target_fraction = [0.0] * num_players
                     animators = [HorseAnimator() for _ in range(num_players)]
+                    final_sound_played = False
 
         if not race.finished:
             triggers = input_provider.poll(events)
             for player_index, steps in triggers:
                 race.apply_trigger(player_index, steps)
+                if steps > 0:
+                    audio.play_galop(player_index)
+
+        if race.finished and not final_sound_played:
+            audio.play_final()
+            final_sound_played = True
 
         for i in range(num_players):
             target_fraction[i] = race.progress_fraction(i)
