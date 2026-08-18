@@ -8,6 +8,17 @@ Run with keyboard (default):   python main.py
 Run with real sensors (on Pi): python main.py --hardware
 """
 
+import os
+import platform
+
+# Force ALSA on Linux/Raspberry Pi — SDL's audio auto-detection doesn't
+# always pick the right device there (e.g. when a TV is connected via
+# HDMI), which results in silent playback with no error. Only do this
+# on Linux; on Windows/Mac the normal auto-detection already works fine
+# and "alsa" isn't even a valid driver there.
+if platform.system() == "Linux":
+    os.environ.setdefault("SDL_AUDIODRIVER", "alsa")
+
 import sys
 import pygame
 import config
