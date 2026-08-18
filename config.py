@@ -16,7 +16,7 @@ import pygame
 # Add a 3rd entry here (and a key mapping below) when you're ready to
 # test with three players. Everything else (rendering, race logic,
 # win detection) already loops over however many players are defined.
-PLAYER_NAMES = ["Valeria", "Adriana"]
+PLAYER_NAMES = ["Stella", "Lucky"]
 PLAYER_COLORS = [
     (209, 53, 43),   # red
     (43, 61, 143),   # blue
